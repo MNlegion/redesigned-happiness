@@ -1,6 +1,23 @@
 import Head from 'next/head'
+import { apiURL } from '../libs/pokemon-api';
+import React from 'react';
 
 export default function Home() {
+  const [pokemonName, setPokemonName] = React.useState("mewtwo")
+  const [pokemon, setPokemon] = React.useState()
+  const [pokemonSpriteList, setPokemonSpriteList] = React.useState([])
+  const [pokemonSprite, setPokemonSprite] = React.useState("dream_world")
+  const handleFormSubmission = React.useCallback(async () => {
+    const response = await fetch(apiURL(pokemonName));
+    const data = await response.json()
+    setPokemon(data)
+    setPokemonSpriteList(Object.keys(data.sprites.other))
+    setPokemonSprite("dream_world")
+  }, [pokemonName])
+  React.useEffect(() => {
+    handleFormSubmission();
+  }, [])
+  const pokemonUrl = pokemon?.sprites?.other?.[pokemonSprite]?.front_default ?? pokemon?.sprites?.other?.["official-artwork"]?.front_default;
   return (
     <div className="container">
       <Head>
@@ -12,7 +29,24 @@ export default function Home() {
         <h1 className="title">
           Welcome to <a href="https://nextjs.org">Official Unofficial Pokedex</a>
         </h1>
-        
+        <img src={pokemonUrl} />
+        <form onSubmit={(e) => {
+          e.preventDefault()
+          handleFormSubmission()
+        }}>
+          <input name='pokemonName' onChange={(e) => {
+            setPokemonName(e.target.value.toLowerCase())
+          }} />
+          <select name='pokemonSprite' value={pokemonSprite} onChange={(e) => {
+              setPokemonSprite(e.target.value)
+            }}>
+            {pokemonSpriteList.map((sprite) => (<option key={sprite} value={sprite}>{sprite}</option>))}
+          </select>
+        </form>
+        {process.env.NODE_ENV==="development"&&<pre>
+          {JSON.stringify(pokemonUrl, undefined, 2)}
+          {JSON.stringify(pokemonSpriteList, undefined, 2)}
+        </pre>}
       </main>
 
       <footer>
