@@ -1,0 +1,1 @@
+export const apiURL = (pokemonName) => `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
